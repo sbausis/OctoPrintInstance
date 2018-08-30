@@ -6,25 +6,43 @@ if [ -z "$1" ]; then
 	INSTANCE_NUM="$1"
 fi
 
+#INSTANCE_NUM="003"
 INSTANCE_NAME="op_"${INSTANCE_NUM}
 
 ################################################################################
 
-adduser ${INSTANCE_NAME}
+adduser --disabled-password --disabled-login --quiet ${INSTANCE_NAME}
 usermod -a -G tty ${INSTANCE_NAME}
 usermod -a -G dialout ${INSTANCE_NAME}
 
 ################################################################################
 
-login ${INSTANCE_NAME}
-cd ~
-sudo apt update
-sudo apt install python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
-mkdir OctoPrint && cd OctoPrint
-virtualenv venv
-source venv/bin/activate
-pip install pip --upgrade
-pip install https://get.octoprint.org/latest
+apt-get update && apt-get -qyy install python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
+
+sudo -u ${INSTANCE_NAME} sh -c 'mkdir /home/'${INSTANCE_NAME}'/OctoPrint && cd /home/'${INSTANCE_NAME}'/OctoPrint && \
+virtualenv venv && \
+. venv/bin/activate && \
+pip install pip --upgrade && \
+pip install https://get.octoprint.org/latest'
+
+mkdir /home/${INSTANCE_NAME}/.octoprint
+cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/config.yaml
+server:
+  commands:
+    serverRestartCommand: sudo service ${INSTANCE_NAME} restart
+    systemRestartCommand: sudo shutdown -r now
+    systemShutdownCommand: sudo shutdown -h now
+  firstRun: false
+  onlineCheck:
+    enabled: true
+  pluginBlacklist:
+    enabled: true
+  secretKey: nUb1QT8ZMy9JjGt6lAgs5GgJTVH4kyBY
+  seenWizards:
+    corewizard: 3
+    cura: null
+
+EOF
 
 ################################################################################
 
