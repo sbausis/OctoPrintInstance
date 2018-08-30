@@ -78,6 +78,7 @@ chmod -R +x /home/${INSTANCE_NAME}/.octoprint
 
 ################################################################################
 
+echo "Creating Octoprint Service for ${INSTANCE_NAME} ..."
 wget -O /tmp/octoprintinstance.init https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.init
 wget -O /tmp/octoprintinstance.default https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.default
 cat /tmp/octoprintinstance.init | sed 's/@@@OP_NUM@@/'${INSTANCE_NUM}'/g' > /tmp/${INSTANCE_NAME}.init
@@ -86,7 +87,10 @@ mv -f /tmp/${INSTANCE_NAME}.init /etc/init.d/${INSTANCE_NAME}
 mv -f /tmp/${INSTANCE_NAME}.default /etc/default/${INSTANCE_NAME}
 chmod +x /etc/init.d/${INSTANCE_NAME}
 
+echo "Enabling Octoprint Service for ${INSTANCE_NAME} ..."
 update-rc.d ${INSTANCE_NAME} defaults
+
+echo "Starting Octoprint Service for ${INSTANCE_NAME} ..."
 service ${INSTANCE_NAME} start
 
 ################################################################################
@@ -96,3 +100,5 @@ service ${INSTANCE_NAME} start
 #rm -Rf /home/op_003
 
 ################################################################################
+
+exit 0
