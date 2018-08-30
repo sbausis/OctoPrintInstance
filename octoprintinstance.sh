@@ -17,7 +17,7 @@ fi
 
 ################################################################################
 
-adduser --disabled-password --disabled-login --quiet ${INSTANCE_NAME}
+adduser --disabled-password --disabled-login --quiet --gecos ${INSTANCE_NAME} ${INSTANCE_NAME}
 usermod -a -G tty ${INSTANCE_NAME}
 usermod -a -G dialout ${INSTANCE_NAME}
 
