@@ -13,6 +13,10 @@ if [ -n ${1} ]; then
 fi
 
 INSTANCE_NAME="op_"${INSTANCE_NUM}
+INSTANCE_API_SYSTEM=$(date | md5sum | awk -F" " '{print toupper($1)}')
+INSTANCE_API_ADMIN=$(date | md5sum | awk -F" " '{print toupper($1)}')
+INSTANCE_SALT="QmcSp5B7fubFuyTFkBMIbIs8fkahkbRf"
+INSTANCE_PASS="e90d9e087935fb5b0d5b0b3f66a44b0459fefe41b52e9a79c397c2ec1cffc7162a51de796ee85839990ed91e4358c358bf664e796aa9ebe878329a4f1e5022fe"
 
 if [ -z ${INSTANCE_NUM} ]; then
 	echo "Argument 1 has to be a unique User Identifier, like '001' !!!"
@@ -49,7 +53,13 @@ echo "Configuring Octoprint for ${INSTANCE_NAME} ..."
 mkdir /home/${INSTANCE_NAME}/.octoprint
 cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/config.yaml
 accessControl:
-  salt: QmcSp5B7fubFuyTFkBMIbIs8fkahkbRf
+  salt: ${INSTANCE_SALT}
+api:
+  key: ${INSTANCE_API_SYSTEM}
+appearance:
+  color: black
+  defaultLanguage: en
+  name: OctoPrint Instance ${INSTANCE_NUM}
 server:
   commands:
     serverRestartCommand: sudo service ${INSTANCE_NAME} restart
@@ -68,7 +78,8 @@ cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/users.yaml
 admin:
   active: true
   apikey: null
-  password: e90d9e087935fb5b0d5b0b3f66a44b0459fefe41b52e9a79c397c2ec1cffc7162a51de796ee85839990ed91e4358c358bf664e796aa9ebe878329a4f1e5022fe
+  apikey: ${INSTANCE_API_ADMIN}
+  password: ${INSTANCE_PASS}
   roles:
   - user
   - admin
