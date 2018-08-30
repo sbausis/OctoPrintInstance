@@ -1,8 +1,11 @@
 
 ################################################################################
-#wget -O /tmp/octoprintinstance.sh https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && bash /tmp/octoprintinstance.sh 003
+#wget -O /tmp/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /tmp/octoprintinstance && /tmp/octoprintinstance 004
 
-if [ -z "$1" ]; then
+set -x
+set -e
+
+if [ -n "$1" ]; then
 	INSTANCE_NUM="$1"
 fi
 
