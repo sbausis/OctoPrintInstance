@@ -43,7 +43,7 @@ echo "Installing needed Packages ..."
 apt-get update && apt-get -qyy install python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
 
 echo "Create Virtual Environment and install Octoprint for ${INSTANCE_NAME} ..."
-sudo -u ${INSTANCE_NAME} sh -c 'mkdir /home/'${INSTANCE_NAME}'/OctoPrint && cd /home/'${INSTANCE_NAME}'/OctoPrint && \
+sudo -u ${INSTANCE_NAME} sh -c 'cd /home/'${INSTANCE_NAME}' && mkdir OctoPrint && cd OctoPrint && \
 virtualenv venv && \
 . venv/bin/activate && \
 pip install pip --upgrade && \
@@ -106,11 +106,20 @@ update-rc.d ${INSTANCE_NAME} defaults
 echo "Starting Octoprint Service for ${INSTANCE_NAME} ..."
 service ${INSTANCE_NAME} start
 
+exit 0
+
 ################################################################################
 # delete a existing OctoPrint Instance
-#service op_003 stop
-#userdel op_003
-#rm -Rf /home/op_003
+INSTANCE_NUM="003"
+INSTANCE_NAME="op_"${INSTANCE_NUM}
+
+service ${INSTANCE_NAME} stop
+update-rc.d ${INSTANCE_NAME} remove
+rm -f /etc/init.d/${INSTANCE_NAME}
+rm -f /etc/default/${INSTANCE_NAME}
+
+userdel ${INSTANCE_NAME}
+rm -Rf /home/${INSTANCE_NAME}
 
 ################################################################################
 
