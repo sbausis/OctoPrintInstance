@@ -1,16 +1,19 @@
 
 ################################################################################
-#wget -O /tmp/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /tmp/octoprintinstance && /tmp/octoprintinstance 004
+#wget -O /tmp/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /tmp/octoprintinstance && /tmp/octoprintinstance 003
 
 set -x
 set -e
 
-if [ -n "$1" ]; then
-	INSTANCE_NUM="$1"
+if [ -n ${1} ]; then
+	INSTANCE_NUM=${1}
 fi
 
-#INSTANCE_NUM="003"
 INSTANCE_NAME="op_"${INSTANCE_NUM}
+
+if [ -z ${INSTANCE_NUM} ]; then
+	exit 1
+fi
 
 ################################################################################
 
@@ -60,5 +63,10 @@ chmod +x /etc/init.d/${INSTANCE_NAME}
 update-rc.d ${INSTANCE_NAME} defaults
 service ${INSTANCE_NAME} start
 
+################################################################################
+
+#service op_003 stop
+#userdel op_003
+#rm -Rf /home/op_003
 
 ################################################################################
