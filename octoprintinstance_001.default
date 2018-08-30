@@ -13,7 +13,7 @@ OCTOPRINT_USER=op_001
 PORT=5001
 
 # Path to the OctoPrint executable, you need to set this to match your installation!
-#DAEMON=/home/op_001/OctoPrint/venv/bin/octoprint
+DAEMON=/home/op_001/OctoPrint/venv/bin/octoprint
 
 # What arguments to pass to octoprint, usually no need to touch this
 DAEMON_ARGS="--port=$PORT"
