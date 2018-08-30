@@ -4,7 +4,7 @@
 OCTOPRINT_USER=pi
 
 # base directory to use
-#BASEDIR=/home/pi/.octoprint
+BASEDIR=/home/pi/.octoprint
 
 # configuration file to use
 #CONFIGFILE=/home/pi/.octoprint/config.yaml

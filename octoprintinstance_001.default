@@ -4,7 +4,7 @@
 OCTOPRINT_USER=op_001
 
 # base directory to use
-#BASEDIR=/home/op_001/.octoprint
+BASEDIR=/home/op_001/.octoprint
 
 # configuration file to use
 #CONFIGFILE=/home/op_001/.octoprint/config.yaml
