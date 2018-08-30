@@ -1,7 +1,11 @@
 
 ################################################################################
+#wget -O /tmp/octoprintinstance.sh https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && bash /tmp/octoprintinstance.sh 003
 
-INSTANCE_NUM=001
+if [ -z "$1" ]; then
+	INSTANCE_NUM="$1"
+fi
+
 INSTANCE_NAME="op_"${INSTANCE_NUM}
 
 ################################################################################
@@ -28,8 +32,8 @@ wget -O /tmp/octoprintinstance.init https://github.com/sbausis/OctoPrintInstance
 wget -O /tmp/octoprintinstance.default https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.default
 cat /tmp/octoprintinstance.init | sed 's/@@@OP_NUM@@/'${INSTANCE_NUM}'/g' > /tmp/${INSTANCE_NAME}.init
 cat /tmp/octoprintinstance.default | sed 's/@@@OP_NUM@@/'${INSTANCE_NUM}'/g' > /tmp/${INSTANCE_NAME}.default
-mv /tmp/${INSTANCE_NAME}.init /etc/init.d/${INSTANCE_NAME}
-mv /tmp/${INSTANCE_NAME}.default /etc/default/${INSTANCE_NAME}
+mv -f /tmp/${INSTANCE_NAME}.init /etc/init.d/${INSTANCE_NAME}
+mv -f /tmp/${INSTANCE_NAME}.default /etc/default/${INSTANCE_NAME}
 chmod +x /etc/init.d/${INSTANCE_NAME}
 
 update-rc.d ${INSTANCE_NAME} defaults
