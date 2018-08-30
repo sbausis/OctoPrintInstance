@@ -48,6 +48,8 @@ pip install https://get.octoprint.org/latest'
 echo "Configuring Octoprint for ${INSTANCE_NAME} ..."
 mkdir /home/${INSTANCE_NAME}/.octoprint
 cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/config.yaml
+accessControl:
+  salt: QmcSp5B7fubFuyTFkBMIbIs8fkahkbRf
 server:
   commands:
     serverRestartCommand: sudo service ${INSTANCE_NAME} restart
@@ -66,7 +68,7 @@ cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/users.yaml
 admin:
   active: true
   apikey: null
-  password: b78c1d7b2b02194f102ae192c6246e084cc22a81ab7d7bc11bf6afc369ba47d42606061ba14e97085ce1b6720929b135ff3238af61030ab576cff696b564ce9e
+  password: e90d9e087935fb5b0d5b0b3f66a44b0459fefe41b52e9a79c397c2ec1cffc7162a51de796ee85839990ed91e4358c358bf664e796aa9ebe878329a4f1e5022fe
   roles:
   - user
   - admin
