@@ -9,6 +9,11 @@ set -e
 
 ################################################################################
 
+function OctoPrintInstance_installDeps() {
+	echo "Installing needed Packages ..."
+	apt-get update && apt-get -qyy install python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
+}
+
 function OctoPrintInstance_exists() {
 	local INSTANCE_NAME="${1}"
 	local USERS=$(sed 's/:.*//' /etc/passwd)
@@ -74,15 +79,11 @@ fi
 
 echo "Creating new OctoPrint Instance with User ${INSTANCE_NAME} ..."
 
-echo "Creating new User ${INSTANCE_NAME} ..."
-adduser --disabled-password --disabled-login --quiet --gecos ${INSTANCE_NAME} ${INSTANCE_NAME}
-usermod -a -G tty ${INSTANCE_NAME}
-usermod -a -G dialout ${INSTANCE_NAME}
+OctoPrintInstance_createUser ${INSTANCE_NAME}
 
 ################################################################################
 
-echo "Installing needed Packages ..."
-apt-get update && apt-get -qyy install python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
+OctoPrintInstance_installDeps
 
 echo "Create Virtual Environment and install Octoprint for ${INSTANCE_NAME} ..."
 sudo -u ${INSTANCE_NAME} sh -c 'cd /home/'${INSTANCE_NAME}' && mkdir OctoPrint && cd OctoPrint && \
