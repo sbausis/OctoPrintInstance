@@ -53,37 +53,37 @@ function OctoPrintInstance_configure() {
 	mkdir /home/${INSTANCE_NAME}/.octoprint
 	cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/config.yaml
 accessControl:
-salt: ${INSTANCE_SALT}
+  salt: ${INSTANCE_SALT}
 api:
-key: ${INSTANCE_API_SYSTEM}
+  key: ${INSTANCE_API_SYSTEM}
 appearance:
-color: black
-defaultLanguage: en
-name: OctoPrint Instance ${INSTANCE_NAME}
+  color: black
+  defaultLanguage: en
+  name: OctoPrint Instance ${INSTANCE_NAME}
 server:
-commands:
-	serverRestartCommand: sudo service ${INSTANCE_NAME} restart
-	systemRestartCommand: sudo shutdown -r now
-	systemShutdownCommand: sudo shutdown -h now
-firstRun: false
-onlineCheck:
-	enabled: true
-pluginBlacklist:
-	enabled: true
-seenWizards:
-	corewizard: 3
-	cura: null
+  commands:
+    serverRestartCommand: sudo service ${INSTANCE_NAME} restart
+    systemRestartCommand: sudo shutdown -r now
+    systemShutdownCommand: sudo shutdown -h now
+  firstRun: false
+  onlineCheck:
+    enabled: true
+  pluginBlacklist:
+    enabled: true
+  seenWizards:
+    corewizard: 3
+    cura: null
 EOF
 	cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/users.yaml
 admin:
-active: true
-apikey: null
-apikey: ${INSTANCE_API_ADMIN}
-password: ${INSTANCE_PASS}
-roles:
-- user
-- admin
-settings: {}
+  active: true
+  apikey: null
+  apikey: ${INSTANCE_API_ADMIN}
+  password: ${INSTANCE_PASS}
+  roles:
+  - user
+  - admin
+  settings: {}
 EOF
 	chown -R ${INSTANCE_NAME}:${INSTANCE_NAME} /home/${INSTANCE_NAME}/.octoprint
 	chmod -R +x /home/${INSTANCE_NAME}/.octoprint
