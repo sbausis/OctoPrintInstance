@@ -1,10 +1,23 @@
 #!/bin/bash
 ################################################################################
 # wget -O /tmp/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /tmp/octoprintinstance && /tmp/octoprintinstance 003
+#for ((i=1; i<=9; i++)); do ./octoprintinstance 00$i &; done
 ################################################################################
 
 #set -x
 set -e
+
+################################################################################
+
+function Delete_OctoPrintInstance() {
+	local INSTANCE_NAME="${1}"
+	service ${INSTANCE_NAME} stop
+	update-rc.d ${INSTANCE_NAME} remove
+	rm -f /etc/init.d/${INSTANCE_NAME}
+	rm -f /etc/default/${INSTANCE_NAME}
+	userdel ${INSTANCE_NAME}
+	rm -Rf /home/${INSTANCE_NAME}
+}
 
 ################################################################################
 
@@ -25,6 +38,13 @@ fi
 
 if [ -d /home/${INSTANCE_NUM} ]; then
 	echo "The User '${INSTANCE_NAME}' already exist, or at least his Homefolder '/home/${INSTANCE_NAME}' !!!"
+	exit 1
+fi
+
+USERS=$(sed 's/:.*//' /etc/passwd)
+USER=$(echo ${USERS} | grep ${INSTANCE_NAME})
+if [ -n ${USER} ]; then
+	echo "The User ${INSTANCE_NAME} already exists !!!"
 	exit 1
 fi
 
@@ -110,16 +130,8 @@ exit 0
 
 ################################################################################
 # delete a existing OctoPrint Instance
-INSTANCE_NUM="003"
-INSTANCE_NAME="op_"${INSTANCE_NUM}
-
-service ${INSTANCE_NAME} stop
-update-rc.d ${INSTANCE_NAME} remove
-rm -f /etc/init.d/${INSTANCE_NAME}
-rm -f /etc/default/${INSTANCE_NAME}
-
-userdel ${INSTANCE_NAME}
-rm -Rf /home/${INSTANCE_NAME}
+INSTANCE_NUM="001"
+Delete_OctoPrintInstance "op_001"
 
 ################################################################################
 
