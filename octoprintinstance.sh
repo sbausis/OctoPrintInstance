@@ -4,11 +4,6 @@
 #for ((i=1; i<=9; i++)); do ./octoprintinstance 00$i &; done
 ################################################################################
 
-#set -x
-set -e
-
-################################################################################
-
 function OctoPrintInstance_installDeps() {
 	echo "Installing needed Packages ..."
 	apt-get update && apt-get -qyy install python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
@@ -130,6 +125,9 @@ function OctoPrintInstance_delete() {
 
 ################################################################################
 
+#set -x
+set -e
+
 if [ -n ${1} ]; then
 	INSTANCE_NUM=${1}
 fi
@@ -145,8 +143,8 @@ INSTANCE_NAME="op_"${INSTANCE_NUM}
 ################################################################################
 
 echo "Creating new OctoPrint Instance with User ${INSTANCE_NAME} ..."
+#OctoPrintInstance_installDeps
 OctoPrintInstance_createUser ${INSTANCE_NAME}
-OctoPrintInstance_installDeps
 OctoPrintInstance_install ${INSTANCE_NAME}
 OctoPrintInstance_configure ${INSTANCE_NAME}
 OctoPrintInstance_createService ${INSTANCE_NAME}
@@ -155,8 +153,7 @@ exit 0
 
 ################################################################################
 # delete a existing OctoPrint Instance
-OctoPrintInstance_delete ${INSTANCE_NAME}
+#OctoPrintInstance_delete ${INSTANCE_NAME}
 
 ################################################################################
 
-exit 0
