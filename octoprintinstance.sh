@@ -10,9 +10,26 @@ set -e
 ################################################################################
 
 function OctoPrintInstance_exists() {
+	local INSTANCE_NAME="${1}"
 	local USERS=$(sed 's/:.*//' /etc/passwd)
 	local USER=$(echo ${USERS} | grep ${INSTANCE_NAME})
 	return ${USER}
+}
+
+function OctoPrintInstance_createUser() {
+	local INSTANCE_NAME="${1}"
+	local USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
+	
+	if [ -n ${USER} ]; then
+		echo "The User ${INSTANCE_NAME} already exists !!!"
+		exit 1
+	fi
+	
+	echo "Creating new User ${INSTANCE_NAME} ..."
+	adduser --disabled-password --disabled-login --quiet --gecos ${INSTANCE_NAME} ${INSTANCE_NAME}
+	usermod -a -G tty ${INSTANCE_NAME}
+	usermod -a -G dialout ${INSTANCE_NAME}
+
 }
 
 function OctoPrintInstance_delete() {
