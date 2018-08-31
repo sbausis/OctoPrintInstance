@@ -20,12 +20,12 @@ function OctoPrintInstance_createUser() {
 	local INSTANCE_NAME="${1}"
 	local USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
 	
-	if [ -n ${USER} ]; then
+	if [ -n "${USER}" ]; then
 		echo "The User ${INSTANCE_NAME} already exists !!!"
 		exit 1
 	fi
 	
-	if [ -d /home/${INSTANCE_NAME} ]; then
+	if [ -d "/home/${INSTANCE_NAME"} ]; then
 		echo "The User '${INSTANCE_NAME}' already exist, or at least his Homefolder '/home/${INSTANCE_NAME}' !!!"
 		exit 1
 	fi
