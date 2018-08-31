@@ -1,24 +1,24 @@
 #!/bin/sh
 
 ### BEGIN INIT INFO
-# Provides:          op_@@@OP_NUM@@
+# Provides:          @@@OP_NAME@@@
 # Required-Start:    $local_fs networking
 # Required-Stop:
 # Should-Start:
 # Should-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: OctoPrintInstance @@@OP_NUM@@ daemon
+# Short-Description: OctoPrintInstance @@@OP_NAME@@@ daemon
 # Description:       Starts the OctoPrint daemon with the user specified in
-#                    /etc/default/op_@@@OP_NUM@@.
+#                    /etc/default/@@@OP_NAME@@@.
 ### END INIT INFO
 
 # Author: Sami Olmari & Gina Häußge
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DESC="OctoPrintInstance @@@OP_NUM@@ Daemon"
-NAME="OctoPrintInstance_@@@OP_NUM@@"
-PKGNAME=op_@@@OP_NUM@@
+DESC="OctoPrintInstance @@@OP_NAME@@@ Daemon"
+NAME="OctoPrintInstance_@@@OP_NAME@@@"
+PKGNAME=@@@OP_NAME@@@
 PIDFILE=/var/run/$PKGNAME.pid
 SCRIPTNAME=/etc/init.d/$PKGNAME
 DEFAULTS=/etc/default/$PKGNAME

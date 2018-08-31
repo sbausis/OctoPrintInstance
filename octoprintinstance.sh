@@ -30,6 +30,11 @@ function OctoPrintInstance_createUser() {
 		exit 1
 	fi
 	
+	if [ -d /home/${INSTANCE_NAME} ]; then
+		echo "The User '${INSTANCE_NAME}' already exist, or at least his Homefolder '/home/${INSTANCE_NAME}' !!!"
+		exit 1
+	fi
+
 	echo "Creating new User ${INSTANCE_NAME} ..."
 	adduser --disabled-password --disabled-login --quiet --gecos ${INSTANCE_NAME} ${INSTANCE_NAME}
 	usermod -a -G tty ${INSTANCE_NAME}
@@ -47,6 +52,24 @@ function OctoPrintInstance_delete() {
 	rm -Rf /home/${INSTANCE_NAME}
 }
 
+function OctoPrintInstance_createService() {
+	INSTANCE_NAME="${1}"
+	echo "Creating Octoprint Service for ${INSTANCE_NAME} ..."
+	wget -O /tmp/octoprintinstance.init https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.init
+	wget -O /tmp/octoprintinstance.default https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.default
+	cat /tmp/octoprintinstance.init | sed 's/@@@OP_NAME@@@/'${INSTANCE_NAME}'/g' > /tmp/${INSTANCE_NAME}.init
+	cat /tmp/octoprintinstance.default | sed 's/@@@OP_NAME@@@/'${INSTANCE_NAME}'/g' > /tmp/${INSTANCE_NAME}.default
+	mv -f /tmp/${INSTANCE_NAME}.init /etc/init.d/${INSTANCE_NAME}
+	mv -f /tmp/${INSTANCE_NAME}.default /etc/default/${INSTANCE_NAME}
+	chmod +x /etc/init.d/${INSTANCE_NAME}
+	
+	echo "Enabling Octoprint Service for ${INSTANCE_NAME} ..."
+	update-rc.d ${INSTANCE_NAME} defaults
+	
+	echo "Starting Octoprint Service for ${INSTANCE_NAME} ..."
+	service ${INSTANCE_NAME} start
+}
+
 ################################################################################
 
 if [ -n ${1} ]; then
@@ -54,24 +77,9 @@ if [ -n ${1} ]; then
 fi
 
 INSTANCE_NAME="op_"${INSTANCE_NUM}
-INSTANCE_API_SYSTEM=$(date | md5sum | awk -F" " '{print toupper($1)}')
-INSTANCE_API_ADMIN=$(date | md5sum | awk -F" " '{print toupper($1)}')
-INSTANCE_SALT="QmcSp5B7fubFuyTFkBMIbIs8fkahkbRf"
-INSTANCE_PASS="e90d9e087935fb5b0d5b0b3f66a44b0459fefe41b52e9a79c397c2ec1cffc7162a51de796ee85839990ed91e4358c358bf664e796aa9ebe878329a4f1e5022fe"
 
 if [ -z ${INSTANCE_NUM} ]; then
 	echo "Argument 1 has to be a unique User Identifier, like '001' !!!"
-	exit 1
-fi
-
-if [ -d /home/${INSTANCE_NUM} ]; then
-	echo "The User '${INSTANCE_NAME}' already exist, or at least his Homefolder '/home/${INSTANCE_NAME}' !!!"
-	exit 1
-fi
-
-USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
-if [ -n ${USER} ]; then
-	echo "The User ${INSTANCE_NAME} already exists !!!"
 	exit 1
 fi
 
@@ -91,6 +99,11 @@ virtualenv venv && \
 . venv/bin/activate && \
 pip install pip --upgrade && \
 pip install https://get.octoprint.org/latest'
+
+INSTANCE_API_SYSTEM=$(date | md5sum | awk -F" " '{print toupper($1)}')
+INSTANCE_API_ADMIN=$(date | md5sum | awk -F" " '{print toupper($1)}')
+INSTANCE_SALT="QmcSp5B7fubFuyTFkBMIbIs8fkahkbRf"
+INSTANCE_PASS="e90d9e087935fb5b0d5b0b3f66a44b0459fefe41b52e9a79c397c2ec1cffc7162a51de796ee85839990ed91e4358c358bf664e796aa9ebe878329a4f1e5022fe"
 
 echo "Configuring Octoprint for ${INSTANCE_NAME} ..."
 mkdir /home/${INSTANCE_NAME}/.octoprint
@@ -134,27 +147,13 @@ chmod -R +x /home/${INSTANCE_NAME}/.octoprint
 
 ################################################################################
 
-echo "Creating Octoprint Service for ${INSTANCE_NAME} ..."
-wget -O /tmp/octoprintinstance.init https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.init
-wget -O /tmp/octoprintinstance.default https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.default
-cat /tmp/octoprintinstance.init | sed 's/@@@OP_NUM@@/'${INSTANCE_NUM}'/g' > /tmp/${INSTANCE_NAME}.init
-cat /tmp/octoprintinstance.default | sed 's/@@@OP_NUM@@/'${INSTANCE_NUM}'/g' > /tmp/${INSTANCE_NAME}.default
-mv -f /tmp/${INSTANCE_NAME}.init /etc/init.d/${INSTANCE_NAME}
-mv -f /tmp/${INSTANCE_NAME}.default /etc/default/${INSTANCE_NAME}
-chmod +x /etc/init.d/${INSTANCE_NAME}
-
-echo "Enabling Octoprint Service for ${INSTANCE_NAME} ..."
-update-rc.d ${INSTANCE_NAME} defaults
-
-echo "Starting Octoprint Service for ${INSTANCE_NAME} ..."
-service ${INSTANCE_NAME} start
+OctoPrintInstance_createService ${INSTANCE_NAME}
 
 exit 0
 
 ################################################################################
 # delete a existing OctoPrint Instance
-INSTANCE_NUM="001"
-Delete_OctoPrintInstance "op_001"
+Delete_OctoPrintInstance ${INSTANCE_NAME}
 
 ################################################################################
 
