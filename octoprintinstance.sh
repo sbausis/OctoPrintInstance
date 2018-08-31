@@ -9,7 +9,13 @@ set -e
 
 ################################################################################
 
-function Delete_OctoPrintInstance() {
+function OctoPrintInstance_exists() {
+	local USERS=$(sed 's/:.*//' /etc/passwd)
+	local USER=$(echo ${USERS} | grep ${INSTANCE_NAME})
+	return ${USER}
+}
+
+function OctoPrintInstance_delete() {
 	local INSTANCE_NAME="${1}"
 	service ${INSTANCE_NAME} stop
 	update-rc.d ${INSTANCE_NAME} remove
@@ -41,8 +47,7 @@ if [ -d /home/${INSTANCE_NUM} ]; then
 	exit 1
 fi
 
-USERS=$(sed 's/:.*//' /etc/passwd)
-USER=$(echo ${USERS} | grep ${INSTANCE_NAME})
+USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
 if [ -n ${USER} ]; then
 	echo "The User ${INSTANCE_NAME} already exists !!!"
 	exit 1
