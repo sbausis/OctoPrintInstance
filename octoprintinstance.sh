@@ -19,32 +19,28 @@ function OctoPrintInstance_exists() {
 function OctoPrintInstance_createUser() {
 	local INSTANCE_NAME="${1}"
 	local USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
-	
 	if [ -n "${USER}" ]; then
 		echo "The User ${INSTANCE_NAME} already exists !!!"
 		exit 1
 	fi
-	
 	if [ -d "/home/${INSTANCE_NAME"} ]; then
 		echo "The User '${INSTANCE_NAME}' already exist, or at least his Homefolder '/home/${INSTANCE_NAME}' !!!"
 		exit 1
 	fi
-
 	echo "Creating new User ${INSTANCE_NAME} ..."
 	adduser --disabled-password --disabled-login --quiet --gecos ${INSTANCE_NAME} ${INSTANCE_NAME}
 	usermod -a -G tty ${INSTANCE_NAME}
 	usermod -a -G dialout ${INSTANCE_NAME}
-
 }
 
 function OctoPrintInstance_install() {
 	local INSTANCE_NAME="${1}"
 	echo "Create Virtual Environment and install Octoprint for ${INSTANCE_NAME} ..."
 	sudo -u ${INSTANCE_NAME} sh -c 'cd /home/'${INSTANCE_NAME}' && mkdir OctoPrint && cd OctoPrint && \
-	virtualenv venv && \
-	. venv/bin/activate && \
-	pip install pip --upgrade && \
-	pip install https://get.octoprint.org/latest'
+virtualenv venv && \
+. venv/bin/activate && \
+pip install pip --upgrade && \
+pip install https://get.octoprint.org/latest'
 }
 
 function OctoPrintInstance_configure() {
@@ -53,7 +49,6 @@ function OctoPrintInstance_configure() {
 	INSTANCE_API_ADMIN=$(date | md5sum | awk -F" " '{print toupper($1)}')
 	INSTANCE_SALT="QmcSp5B7fubFuyTFkBMIbIs8fkahkbRf"
 	INSTANCE_PASS="e90d9e087935fb5b0d5b0b3f66a44b0459fefe41b52e9a79c397c2ec1cffc7162a51de796ee85839990ed91e4358c358bf664e796aa9ebe878329a4f1e5022fe"
-	
 	echo "Configuring Octoprint for ${INSTANCE_NAME} ..."
 	mkdir /home/${INSTANCE_NAME}/.octoprint
 	cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/config.yaml
@@ -90,7 +85,6 @@ roles:
 - admin
 settings: {}
 EOF
-	
 	chown -R ${INSTANCE_NAME}:${INSTANCE_NAME} /home/${INSTANCE_NAME}/.octoprint
 	chmod -R +x /home/${INSTANCE_NAME}/.octoprint
 }
@@ -105,12 +99,19 @@ function OctoPrintInstance_createService() {
 	mv -f /tmp/${INSTANCE_NAME}.init /etc/init.d/${INSTANCE_NAME}
 	mv -f /tmp/${INSTANCE_NAME}.default /etc/default/${INSTANCE_NAME}
 	chmod +x /etc/init.d/${INSTANCE_NAME}
-	
+}
+
+function OctoPrintInstance_enableService() {
+	INSTANCE_NAME="${1}"
 	echo "Enabling Octoprint Service for ${INSTANCE_NAME} ..."
 	update-rc.d ${INSTANCE_NAME} defaults
-	
+}
+
+function OctoPrintInstance_startService() {
+	INSTANCE_NAME="${1}"
 	echo "Starting Octoprint Service for ${INSTANCE_NAME} ..."
-	service ${INSTANCE_NAME} start
+	#service ${INSTANCE_NAME} start
+	/etc/init.d/${INSTANCE_NAME} start
 }
 
 function OctoPrintInstance_delete() {
@@ -125,7 +126,7 @@ function OctoPrintInstance_delete() {
 
 ################################################################################
 
-#set -x
+set -x
 set -e
 
 if [ -n ${1} ]; then
@@ -143,11 +144,13 @@ INSTANCE_NAME="op_"${INSTANCE_NUM}
 ################################################################################
 
 echo "Creating new OctoPrint Instance with User ${INSTANCE_NAME} ..."
-#OctoPrintInstance_installDeps
+OctoPrintInstance_installDeps
 OctoPrintInstance_createUser ${INSTANCE_NAME}
 OctoPrintInstance_install ${INSTANCE_NAME}
 OctoPrintInstance_configure ${INSTANCE_NAME}
 OctoPrintInstance_createService ${INSTANCE_NAME}
+OctoPrintInstance_enableService ${INSTANCE_NAME}
+OctoPrintInstance_startService ${INSTANCE_NAME}
 
 exit 0
 
