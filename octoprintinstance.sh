@@ -9,17 +9,13 @@ function OctoPrintInstance_installDeps() {
 	apt-get update && apt-get -qyy install python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
 }
 
-function OctoPrintInstance_exists() {
-	local INSTANCE_NAME="${1}"
-	local USERS=$(sed 's/:.*//' /etc/passwd | grep ${INSTANCE_NAME})
-	echo "${USERS}"
-}
+################################################################################
 
 function OctoPrintInstance_createUser() {
 	local INSTANCE_NAME="${1}"
 	local USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
 	if [ -n "${USER}" ]; then
-		echo "The Instance ${INSTANCE_NAME} already exists !!!"
+		echo "The User ${INSTANCE_NAME} already exists !!!"
 		exit 1
 	fi
 	if [ -d "/home/${INSTANCE_NAME}" ]; then
@@ -31,6 +27,20 @@ function OctoPrintInstance_createUser() {
 	usermod -a -G tty ${INSTANCE_NAME}
 	usermod -a -G dialout ${INSTANCE_NAME}
 }
+
+function OctoPrintInstance_deleteUser() {
+	local INSTANCE_NAME="${1}"
+	local USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
+	if [ -z "${USER}" ]; then
+		echo "The User ${INSTANCE_NAME} seems not to exists !!!"
+		exit 1
+	fi
+	killall --user ${INSTANCE_NAME}
+	userdel ${INSTANCE_NAME}
+	rm -Rf /home/${INSTANCE_NAME}
+}
+
+################################################################################
 
 function OctoPrintInstance_installOctoprint() {
 	local INSTANCE_NAME="${1}"
@@ -44,10 +54,10 @@ pip install https://get.octoprint.org/latest'
 
 function OctoPrintInstance_configureOctoprint() {
 	local INSTANCE_NAME="${1}"
-	INSTANCE_API_SYSTEM=$(date | md5sum | awk -F" " '{print toupper($1)}')
-	INSTANCE_API_ADMIN=$(date | md5sum | awk -F" " '{print toupper($1)}')
-	INSTANCE_SALT="QmcSp5B7fubFuyTFkBMIbIs8fkahkbRf"
-	INSTANCE_PASS="e90d9e087935fb5b0d5b0b3f66a44b0459fefe41b52e9a79c397c2ec1cffc7162a51de796ee85839990ed91e4358c358bf664e796aa9ebe878329a4f1e5022fe"
+	local INSTANCE_API_SYSTEM=$(date | md5sum | awk -F" " '{print toupper($1)}')
+	local INSTANCE_API_ADMIN=$(date | md5sum | awk -F" " '{print toupper($1)}')
+	local INSTANCE_SALT="QmcSp5B7fubFuyTFkBMIbIs8fkahkbRf"
+	local INSTANCE_PASS="e90d9e087935fb5b0d5b0b3f66a44b0459fefe41b52e9a79c397c2ec1cffc7162a51de796ee85839990ed91e4358c358bf664e796aa9ebe878329a4f1e5022fe"
 	echo "Configuring Octoprint for ${INSTANCE_NAME} ..."
 	mkdir /home/${INSTANCE_NAME}/.octoprint
 	cat <<EOF > /home/${INSTANCE_NAME}/.octoprint/config.yaml
@@ -88,8 +98,16 @@ EOF
 	chmod -R +x /home/${INSTANCE_NAME}/.octoprint
 }
 
+function OctoPrintInstance_removeOctoprint() {
+	local INSTANCE_NAME="${1}"
+	rm -Rf /home/${INSTANCE_NAME}/.octoprint
+	rm -Rf /home/${INSTANCE_NAME}/OctoPrint
+}
+
+################################################################################
+
 function OctoPrintInstance_createService() {
-	INSTANCE_NAME="${1}"
+	local INSTANCE_NAME="${1}"
 	echo "Creating Octoprint Service for ${INSTANCE_NAME} ..."
 	wget -O /tmp/octoprintinstance.init https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.init
 	wget -O /tmp/octoprintinstance.default https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.default
@@ -101,16 +119,48 @@ function OctoPrintInstance_createService() {
 }
 
 function OctoPrintInstance_enableService() {
-	INSTANCE_NAME="${1}"
+	local INSTANCE_NAME="${1}"
 	echo "Enabling Octoprint Service for ${INSTANCE_NAME} ..."
 	update-rc.d ${INSTANCE_NAME} defaults
 }
 
 function OctoPrintInstance_startService() {
-	INSTANCE_NAME="${1}"
+	local INSTANCE_NAME="${1}"
 	echo "Starting Octoprint Service for ${INSTANCE_NAME} ..."
 	#service ${INSTANCE_NAME} start
 	/etc/init.d/${INSTANCE_NAME} start
+}
+
+function OctoPrintInstance_runningService() {
+	local INSTANCE_NAME="${1}"
+	local SERVICE=$(service --status-all | grep "${INSTANCE_NAME}" | awk '{print $2}')
+}
+
+function OctoPrintInstance_stopService() {
+	local INSTANCE_NAME="${1}"
+	echo "Stopping Octoprint Service for ${INSTANCE_NAME} ..."
+	#service ${INSTANCE_NAME} stop
+	/etc/init.d/${INSTANCE_NAME} stop
+}
+
+function OctoPrintInstance_disableService() {
+	local INSTANCE_NAME="${1}"
+	echo "Disabling Octoprint Service for ${INSTANCE_NAME} ..."
+	update-rc.d ${INSTANCE_NAME} remove
+}
+
+function OctoPrintInstance_removeService() {
+	local INSTANCE_NAME="${1}"
+	rm -f /etc/init.d/${INSTANCE_NAME}
+	rm -f /etc/default/${INSTANCE_NAME}
+}
+
+################################################################################
+
+function OctoPrintInstance_exists() {
+	local INSTANCE_NAME="${1}"
+	local USERS=$(sed 's/:.*//' /etc/passwd | grep ${INSTANCE_NAME})
+	echo "${USERS}"
 }
 
 function OctoPrintInstance_list() {
@@ -121,18 +171,11 @@ function OctoPrintInstance_list() {
 
 function OctoPrintInstance_delete() {
 	local INSTANCE_NAME="${1}"
-	local USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
-	if [ -z "${USER}" ]; then
-		echo "The Instance ${INSTANCE_NAME} seems not to exists !!!"
-		exit 1
-	fi
-	service ${INSTANCE_NAME} stop
-	update-rc.d ${INSTANCE_NAME} remove
-	rm -f /etc/init.d/${INSTANCE_NAME}
-	rm -f /etc/default/${INSTANCE_NAME}
-	killall --user ${INSTANCE_NAME}
-	userdel ${INSTANCE_NAME}
-	rm -Rf /home/${INSTANCE_NAME}
+	OctoPrintInstance_stopService ${INSTANCE_NAME}
+	OctoPrintInstance_disableService ${INSTANCE_NAME}
+	OctoPrintInstance_removeService ${INSTANCE_NAME}
+	OctoPrintInstance_removeOctoprint ${INSTANCE_NAME}
+	OctoPrintInstance_deleteUser ${INSTANCE_NAME}
 }
 
 function OctoPrintInstance_create() {
