@@ -33,7 +33,7 @@ function OctoPrintInstance_createUser() {
 	usermod -a -G dialout ${INSTANCE_NAME}
 }
 
-function OctoPrintInstance_install() {
+function OctoPrintInstance_installOctoprint() {
 	local INSTANCE_NAME="${1}"
 	echo "Create Virtual Environment and install Octoprint for ${INSTANCE_NAME} ..."
 	sudo -u ${INSTANCE_NAME} sh -c 'cd /home/'${INSTANCE_NAME}' && mkdir OctoPrint && cd OctoPrint && \
@@ -43,7 +43,7 @@ pip install pip --upgrade && \
 pip install https://get.octoprint.org/latest'
 }
 
-function OctoPrintInstance_configure() {
+function OctoPrintInstance_configureOctoprint() {
 	local INSTANCE_NAME="${1}"
 	INSTANCE_API_SYSTEM=$(date | md5sum | awk -F" " '{print toupper($1)}')
 	INSTANCE_API_ADMIN=$(date | md5sum | awk -F" " '{print toupper($1)}')
@@ -114,6 +114,12 @@ function OctoPrintInstance_startService() {
 	/etc/init.d/${INSTANCE_NAME} start
 }
 
+function OctoPrintInstance_list() {
+	local INSTANCE_PREFIX="op_"
+	local USERS=$(sed 's/:.*//' /etc/passwd | grep ${INSTANCE_PREFIX})
+	echo "${USERS}"
+}
+
 function OctoPrintInstance_delete() {
 	local INSTANCE_NAME="${1}"
 	service ${INSTANCE_NAME} stop
@@ -124,15 +130,32 @@ function OctoPrintInstance_delete() {
 	rm -Rf /home/${INSTANCE_NAME}
 }
 
+function OctoPrintInstance_create() {
+	local INSTANCE_NAME="${1}"
+	echo "Creating new OctoPrint Instance with User ${INSTANCE_NAME} ..."
+	OctoPrintInstance_installDeps
+	OctoPrintInstance_createUser ${INSTANCE_NAME}
+	OctoPrintInstance_installOctoprint ${INSTANCE_NAME}
+	OctoPrintInstance_configureOctoprint ${INSTANCE_NAME}
+	OctoPrintInstance_createService ${INSTANCE_NAME}
+	OctoPrintInstance_enableService ${INSTANCE_NAME}
+	OctoPrintInstance_startService ${INSTANCE_NAME}
+}
+
 ################################################################################
 
 set -x
 set -e
-
-if [ -n ${1} ]; then
-	INSTANCE_NUM=${1}
-fi
-
+MODE="none"
+while getopts "le:d:c:n:" option; do
+	case "${option}" in
+		l) MODE="list";;
+		e) MODE="exists"; INSTANCE_NUM=${OPTARG};;
+		d) MODE="delete"; INSTANCE_NUM=${OPTARG};;
+		c) MODE="create"; INSTANCE_NUM=${OPTARG};;
+		n) INSTANCE_NUM=${OPTARG};;
+	esac
+done
 
 if [ -z ${INSTANCE_NUM} ]; then
 	echo "Argument 1 has to be a unique User Identifier, like '001' !!!"
@@ -141,22 +164,15 @@ fi
 
 INSTANCE_NAME="op_"${INSTANCE_NUM}
 
-################################################################################
+case "${MODE}" in
+	"list") OctoPrintInstance_list; exit 0;;
+	"exists") OctoPrintInstance_exists ${INSTANCE_NAME}; exit 0;;
+	"delete") OctoPrintInstance_delete ${INSTANCE_NAME}; exit 0;;
+	"create") OctoPrintInstance_create ${INSTANCE_NAME}; exit 0;;
+	"none") echo "Mode is ${MODE} !!!"; exit 1;;
+esac
 
-echo "Creating new OctoPrint Instance with User ${INSTANCE_NAME} ..."
-OctoPrintInstance_installDeps
-OctoPrintInstance_createUser ${INSTANCE_NAME}
-OctoPrintInstance_install ${INSTANCE_NAME}
-OctoPrintInstance_configure ${INSTANCE_NAME}
-OctoPrintInstance_createService ${INSTANCE_NAME}
-OctoPrintInstance_enableService ${INSTANCE_NAME}
-OctoPrintInstance_startService ${INSTANCE_NAME}
-
-exit 0
-
-################################################################################
-# delete a existing OctoPrint Instance
-#OctoPrintInstance_delete ${INSTANCE_NAME}
+exit 1
 
 ################################################################################
 
