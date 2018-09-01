@@ -11,16 +11,15 @@ function OctoPrintInstance_installDeps() {
 
 function OctoPrintInstance_exists() {
 	local INSTANCE_NAME="${1}"
-	local USERS=$(sed 's/:.*//' /etc/passwd)
-	local USER=$(echo ${USERS} | grep ${INSTANCE_NAME})
-	return ${USER}
+	local USERS=$(sed 's/:.*//' /etc/passwd | grep ${INSTANCE_NAME})
+	echo "${USERS}"
 }
 
 function OctoPrintInstance_createUser() {
 	local INSTANCE_NAME="${1}"
 	local USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
 	if [ -n "${USER}" ]; then
-		echo "The User ${INSTANCE_NAME} already exists !!!"
+		echo "The Instance ${INSTANCE_NAME} already exists !!!"
 		exit 1
 	fi
 	if [ -d "/home/${INSTANCE_NAME}" ]; then
@@ -122,10 +121,16 @@ function OctoPrintInstance_list() {
 
 function OctoPrintInstance_delete() {
 	local INSTANCE_NAME="${1}"
+	local USER=$(OctoPrintInstance_exists ${INSTANCE_NAME})
+	if [ -z "${USER}" ]; then
+		echo "The Instance ${INSTANCE_NAME} seems not to exists !!!"
+		exit 1
+	fi
 	service ${INSTANCE_NAME} stop
 	update-rc.d ${INSTANCE_NAME} remove
 	rm -f /etc/init.d/${INSTANCE_NAME}
 	rm -f /etc/default/${INSTANCE_NAME}
+	killall --user ${INSTANCE_NAME}
 	userdel ${INSTANCE_NAME}
 	rm -Rf /home/${INSTANCE_NAME}
 }
@@ -146,10 +151,11 @@ function OctoPrintInstance_create() {
 
 set -x
 set -e
+
 MODE="none"
 while getopts "le:d:c:n:" option; do
 	case "${option}" in
-		l) MODE="list";;
+		l) MODE="list"; INSTANCE_NUM=0;;
 		e) MODE="exists"; INSTANCE_NUM=${OPTARG};;
 		d) MODE="delete"; INSTANCE_NUM=${OPTARG};;
 		c) MODE="create"; INSTANCE_NUM=${OPTARG};;
