@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# wget -O /tmp/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /tmp/octoprintinstance && /tmp/octoprintinstance 003
+# wget -O /root/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /root/octoprintinstance && /root/octoprintinstance -l
 #for ((i=1; i<=9; i++)); do ./octoprintinstance 00$i &; done
 ################################################################################
 
@@ -196,12 +196,13 @@ set -x
 set -e
 
 MODE="none"
-while getopts "le:d:c:n:" option; do
+while getopts "le:d:c:s:n:" option; do
 	case "${option}" in
 		l) MODE="list"; INSTANCE_NUM=0;;
 		e) MODE="exists"; INSTANCE_NUM=${OPTARG};;
 		d) MODE="delete"; INSTANCE_NUM=${OPTARG};;
 		c) MODE="create"; INSTANCE_NUM=${OPTARG};;
+		s) MODE="service"${OPTARG}; INSTANCE_NUM=0;;
 		n) INSTANCE_NUM=${OPTARG};;
 	esac
 done
@@ -218,6 +219,10 @@ case "${MODE}" in
 	"exists") OctoPrintInstance_exists ${INSTANCE_NAME}; exit 0;;
 	"delete") OctoPrintInstance_delete ${INSTANCE_NAME}; exit 0;;
 	"create") OctoPrintInstance_create ${INSTANCE_NAME}; exit 0;;
+	"servicestart") OctoPrintInstance_startService ${INSTANCE_NAME}; exit 0;;
+	"servicestop") OctoPrintInstance_stopService ${INSTANCE_NAME}; exit 0;;
+	"servicestatus") OctoPrintInstance_runningService ${INSTANCE_NAME}; exit 0;;
+	"servicerestart") OctoPrintInstance_stopService ${INSTANCE_NAME}; OctoPrintInstance_startService ${INSTANCE_NAME}; exit 0;;
 	"none") echo "Mode is ${MODE} !!!"; exit 1;;
 esac
 
