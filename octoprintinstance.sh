@@ -1,12 +1,13 @@
 #!/bin/bash
 ################################################################################
 # wget -O /root/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /root/octoprintinstance && /root/octoprintinstance -l
-#for ((i=1; i<=9; i++)); do ./octoprintinstance 00$i &; done
+# for ((i=1; i<=9; i++)); do ./octoprintinstance 00$i &; done
 ################################################################################
 
 function OctoPrintInstance_installDeps() {
 	echo "Installing needed Packages ..."
-	apt-get update && apt-get -qyy install python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
+	#apt-get update && 
+	apt-get -qyy install psmisc python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
 }
 
 ################################################################################
@@ -181,7 +182,6 @@ function OctoPrintInstance_delete() {
 function OctoPrintInstance_create() {
 	local INSTANCE_NAME="${1}"
 	echo "Creating new OctoPrint Instance with User ${INSTANCE_NAME} ..."
-	OctoPrintInstance_installDeps
 	OctoPrintInstance_createUser ${INSTANCE_NAME}
 	OctoPrintInstance_installOctoprint ${INSTANCE_NAME}
 	OctoPrintInstance_configureOctoprint ${INSTANCE_NAME}
@@ -213,6 +213,8 @@ if [ -z ${INSTANCE_NUM} ]; then
 fi
 
 INSTANCE_NAME="op_"${INSTANCE_NUM}
+
+OctoPrintInstance_installDeps
 
 case "${MODE}" in
 	"list") OctoPrintInstance_list; exit 0;;
