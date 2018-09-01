@@ -122,14 +122,14 @@ function OctoPrintInstance_createService() {
 function OctoPrintInstance_enableService() {
 	local INSTANCE_NAME="${1}"
 	echo "Enabling Octoprint Service for ${INSTANCE_NAME} ..."
-	update-rc.d ${INSTANCE_NAME} defaults
+	[ -x "/etc/init.d/${INSTANCE_NAME}" ] && update-rc.d ${INSTANCE_NAME} defaults
 }
 
 function OctoPrintInstance_startService() {
 	local INSTANCE_NAME="${1}"
 	echo "Starting Octoprint Service for ${INSTANCE_NAME} ..."
 	#service ${INSTANCE_NAME} start
-	/etc/init.d/${INSTANCE_NAME} start
+	[ -x "/etc/init.d/${INSTANCE_NAME}" ] && /etc/init.d/${INSTANCE_NAME} start
 }
 
 function OctoPrintInstance_runningService() {
@@ -141,13 +141,13 @@ function OctoPrintInstance_stopService() {
 	local INSTANCE_NAME="${1}"
 	echo "Stopping Octoprint Service for ${INSTANCE_NAME} ..."
 	#service ${INSTANCE_NAME} stop
-	/etc/init.d/${INSTANCE_NAME} stop
+	[ -x "/etc/init.d/${INSTANCE_NAME}" ] && /etc/init.d/${INSTANCE_NAME} stop
 }
 
 function OctoPrintInstance_disableService() {
 	local INSTANCE_NAME="${1}"
 	echo "Disabling Octoprint Service for ${INSTANCE_NAME} ..."
-	update-rc.d ${INSTANCE_NAME} remove
+	[ -x "/etc/init.d/${INSTANCE_NAME}" ] && update-rc.d ${INSTANCE_NAME} remove
 }
 
 function OctoPrintInstance_removeService() {
@@ -192,8 +192,8 @@ function OctoPrintInstance_create() {
 
 ################################################################################
 
-set -x
-set -e
+#set -x
+#set -e
 
 MODE="none"
 while getopts "le:d:c:s:n:" option; do
@@ -214,7 +214,7 @@ fi
 
 INSTANCE_NAME="op_"${INSTANCE_NUM}
 
-OctoPrintInstance_installDeps
+#OctoPrintInstance_installDeps
 
 case "${MODE}" in
 	"list") OctoPrintInstance_list; exit 0;;
