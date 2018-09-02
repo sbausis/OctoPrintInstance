@@ -105,6 +105,35 @@ function OctoPrintInstance_removeOctoprint() {
 	rm -Rf /home/${INSTANCE_NAME}/OctoPrint
 }
 
+function OctoPrintInstance_addPluginOctoprint() {
+	local INSTANCE_NAME="${1}"
+	local PLUGIN_URL="${2}"
+	[ -x "/home/${INSTANCE_NAME}/OctoPrint/venv/bin/pip" ] && /home/${INSTANCE_NAME}/OctoPrint/venv/bin/pip install ${PLUGIN_URL}
+	#service ${INSTANCE_NAME} restart
+	#/etc/init.d/${INSTANCE_NAME} restart
+}
+
+function OctoPrintInstance_addPluginsOctoprint() {
+	local INSTANCE_NAME="${1}"
+	local PLUGINS="https://github.com/jneilliii/OctoPrint-CustomBackground/archive/0.10.0.zip
+https://github.com/amsbr/OctoPrint-EEPROM-Marlin/archive/1.2.1.zip
+https://github.com/jslay88/OctoPrint-Dropbox-Timelapse/archive/0.1.2.zip
+https://github.com/OctoPrint/OctoPrint-FirmwareUpdater/archive/1.0.0.zip
+https://github.com/jneilliii/OctoPrint-M117PopUp/archive/0.6.0.zip
+https://github.com/OctoPrint/OctoPrint-MQTT/archive/0.7.1.zip
+https://github.com/imrahil/OctoPrint-PrintHistory/archive/1.2.zip
+https://github.com/amsbr/OctoPrint-Stats/archive/1.0.0.zip
+https://github.com/OctoPrint/OctoPrint-Pushbullet/archive/0.1.9.zip
+https://github.com/Birkbjo/OctoPrint-Themeify/archive/1.2.0.zip
+https://github.com/OctoPrint/OctoPrint-CommandSplitter/archive/0.1.0.zip"
+	for PLUGIN in ${PLUGINS}
+	do
+		OctoPrintInstance_addPluginOctoprint ${INSTANCE_NAME} ${PLUGIN}
+	done
+	#service ${INSTANCE_NAME} restart
+	/etc/init.d/${INSTANCE_NAME} restart
+}
+
 ################################################################################
 
 function OctoPrintInstance_createService() {
@@ -196,12 +225,13 @@ function OctoPrintInstance_create() {
 #set -e
 
 MODE="none"
-while getopts "le:d:c:s:n:" option; do
+while getopts "le:d:c:p:s:n:" option; do
 	case "${option}" in
 		l) MODE="list"; INSTANCE_NUM=0;;
 		e) MODE="exists"; INSTANCE_NUM=${OPTARG};;
 		d) MODE="delete"; INSTANCE_NUM=${OPTARG};;
 		c) MODE="create"; INSTANCE_NUM=${OPTARG};;
+		p) MODE="plugins"; INSTANCE_NUM=${OPTARG};;
 		s) MODE="service"${OPTARG}; INSTANCE_NUM=0;;
 		n) INSTANCE_NUM=${OPTARG};;
 	esac
@@ -221,6 +251,7 @@ case "${MODE}" in
 	"exists") OctoPrintInstance_exists ${INSTANCE_NAME}; exit 0;;
 	"delete") OctoPrintInstance_delete ${INSTANCE_NAME}; exit 0;;
 	"create") OctoPrintInstance_create ${INSTANCE_NAME}; exit 0;;
+	"plugins") OctoPrintInstance_addPluginsOctoprint ${INSTANCE_NAME}; exit 0;;
 	"servicestart") OctoPrintInstance_startService ${INSTANCE_NAME}; exit 0;;
 	"servicestop") OctoPrintInstance_stopService ${INSTANCE_NAME}; exit 0;;
 	"servicestatus") OctoPrintInstance_runningService ${INSTANCE_NAME}; exit 0;;
