@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# wget -O /root/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /root/octoprintinstance && /root/octoprintinstance -l
+# wget --no-check-certificate -O /root/octoprintinstance https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.sh && chmod +x /root/octoprintinstance && /root/octoprintinstance -l
 # for ((i=1; i<=9; i++)); do ./octoprintinstance 00$i &; done
 ################################################################################
 
@@ -50,7 +50,7 @@ function OctoPrintInstance_installOctoprint() {
 virtualenv venv && \
 . venv/bin/activate && \
 pip install pip --upgrade && \
-pip install https://get.octoprint.org/latest'
+pip install https://github.com/foosel/OctoPrint/archive/1.3.9.zip'
 }
 
 function OctoPrintInstance_configureOctoprint() {
@@ -110,8 +110,8 @@ function OctoPrintInstance_removeOctoprint() {
 function OctoPrintInstance_createService() {
 	local INSTANCE_NAME="${1}"
 	echo "Creating Octoprint Service for ${INSTANCE_NAME} ..."
-	wget -O /tmp/octoprintinstance.init https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.init
-	wget -O /tmp/octoprintinstance.default https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.default
+	wget --no-check-certificate -O /tmp/octoprintinstance.init https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.init
+	wget --no-check-certificate -O /tmp/octoprintinstance.default https://github.com/sbausis/OctoPrintInstance/raw/master/octoprintinstance.default
 	cat /tmp/octoprintinstance.init | sed 's/@@@OP_NAME@@@/'${INSTANCE_NAME}'/g' > /tmp/${INSTANCE_NAME}.init
 	cat /tmp/octoprintinstance.default | sed 's/@@@OP_NAME@@@/'${INSTANCE_NAME}'/g' > /tmp/${INSTANCE_NAME}.default
 	mv -f /tmp/${INSTANCE_NAME}.init /etc/init.d/${INSTANCE_NAME}
