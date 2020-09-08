@@ -130,6 +130,7 @@ https://github.com/OctoPrint/OctoPrint-CommandSplitter/archive/0.1.0.zip"
 	do
 		OctoPrintInstance_addPluginOctoprint ${INSTANCE_NAME} ${PLUGIN}
 	done
+	chown --recursive ${INSTANCE_NAME} /home/${INSTANCE_NAME}/OctoPrint/
 	#service ${INSTANCE_NAME} restart
 	/etc/init.d/${INSTANCE_NAME} restart
 }
