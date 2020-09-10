@@ -7,7 +7,7 @@
 function OctoPrintInstance_installDeps() {
 	echo "Installing needed Packages ..."
 	#apt-get update && 
-	apt-get -qyy install psmisc python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
+	apt-get -qyy install psmisc virtualenv python-pip python-dev python-setuptools python-virtualenv git libyaml-dev build-essential
 }
 
 ################################################################################
@@ -50,7 +50,7 @@ function OctoPrintInstance_installOctoprint() {
 virtualenv venv && \
 . venv/bin/activate && \
 pip install pip --upgrade && \
-pip install https://github.com/foosel/OctoPrint/archive/1.3.9.zip'
+pip install https://github.com/foosel/OctoPrint/archive/1.4.2.zip'
 }
 
 function OctoPrintInstance_configureOctoprint() {
@@ -115,17 +115,17 @@ function OctoPrintInstance_addPluginOctoprint() {
 
 function OctoPrintInstance_addPluginsOctoprint() {
 	local INSTANCE_NAME="${1}"
-	local PLUGINS="https://github.com/jneilliii/OctoPrint-CustomBackground/archive/0.10.0.zip
+	local PLUGINS="https://github.com/jneilliii/OctoPrint-CustomBackground/archive/0.10.1.zip
 https://github.com/amsbr/OctoPrint-EEPROM-Marlin/archive/1.2.1.zip
-https://github.com/jslay88/OctoPrint-Dropbox-Timelapse/archive/0.1.2.zip
-https://github.com/OctoPrint/OctoPrint-FirmwareUpdater/archive/1.0.0.zip
-https://github.com/jneilliii/OctoPrint-M117PopUp/archive/0.6.0.zip
-https://github.com/OctoPrint/OctoPrint-MQTT/archive/0.7.1.zip
+https://github.com/jslay88/OctoPrint-Dropbox-Timelapse/archive/0.1.4.zip
+https://github.com/OctoPrint/OctoPrint-FirmwareUpdater/archive/1.7.0.zip
+https://github.com/jneilliii/OctoPrint-M117PopUp/archive/0.6.2.zip
+https://github.com/OctoPrint/OctoPrint-MQTT/archive/0.8.7.zip
 https://github.com/imrahil/OctoPrint-PrintHistory/archive/1.2.zip
-https://github.com/amsbr/OctoPrint-Stats/archive/1.0.0.zip
-https://github.com/OctoPrint/OctoPrint-Pushbullet/archive/0.1.9.zip
-https://github.com/Birkbjo/OctoPrint-Themeify/archive/1.2.0.zip
-https://github.com/OctoPrint/OctoPrint-CommandSplitter/archive/0.1.0.zip"
+https://github.com/amsbr/OctoPrint-Stats/archive/2.0.2.zip
+https://github.com/OctoPrint/OctoPrint-Pushbullet/archive/0.1.10.zip
+https://github.com/Birkbjo/OctoPrint-Themeify/archive/1.2.2.zip
+https://github.com/OctoPrint/OctoPrint-CommandSplitter/archive/0.2.3.zip"
 	for PLUGIN in ${PLUGINS}
 	do
 		OctoPrintInstance_addPluginOctoprint ${INSTANCE_NAME} ${PLUGIN}
